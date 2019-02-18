@@ -1,0 +1,2 @@
+I added a few additional dependencies which are specified in requirements.txt. You'll want to pip install those before running the application.
+To run the app first run `./manage.py runserver` and in a separate process run `celery -A rj_exercise worker --loglevel=info`
