@@ -12,5 +12,5 @@ class Item(models.Model):
     cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
 
     product_id = models.TextField()
-    name = models.TextField()
-    price = models.IntegerField()
+    name = models.TextField(null=True)
+    price = models.IntegerField(null=True)
