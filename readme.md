@@ -26,6 +26,7 @@ The data model has been greatly simplified for this task and contains two tables
 
 - `Cart` - An object which represents a customer's online cart which can contain
 several items.
+
 - `Item` - An object which represents a single item in the cart.
 
 These models are defined in `tracker/models.py`
@@ -40,35 +41,38 @@ This endpoint adds an item to the current cart using the following logic:
 
 - The current cart ID will be the first valid UUID found in one of the
 following sources, in order of priority:
-    1. The `cart_id` cookie sent with the request
-    1. The `cart_id` parameter in the body of the request
-    1. If neither exists nor is valid, a new cart ID should be generated.
+
+  1. The `cart_id` cookie sent with the request
+
+  2. The `cart_id` parameter in the body of the request
+
+  3. If neither exists nor is valid, a new cart ID should be generated.
 
 ### JSON Payload
 
-Name | Type | Description | Required
--- | -- | -- | --
-`product_id` | String | ID which represents the product on the e-commerce site. (e.g. a SKU) | Yes
-`cart_id` | String | ID of the current cart stored in the first-party cookie. | No
-`name` | String | The name of the product. | No
-`price` | Integer | The price of the item (in cents). | No
+| Name         | Type    | Description                                                          | Required |
+| ------------ | ------- | -------------------------------------------------------------------- | -------- |
+| `product_id` | String  | ID which represents the product on the e-commerce site. (e.g. a SKU) | Yes      |
+| `cart_id`    | String  | ID of the current cart stored in the first-party cookie.             | No       |
+| `name`       | String  | The name of the product.                                             | No       |
+| `price`      | Integer | The price of the item (in cents).                                    | No       |
 
 ### Cookies
 
 The following third-party cookies may be included with the request.
 
-Name | Type | Description | Required
--- | -- | -- | --
-`cart_id` | String | ID of the current cart. | No
+| Name      | Type   | Description             | Required |
+| --------- | ------ | ----------------------- | -------- |
+| `cart_id` | String | ID of the current cart. | No       |
 
 ### Response
 
 The endpoint returns the ID of the current cart as a JSON payload. The e-commerce website
 will then store the result of this response as a first-party cookie for future requests.
 
-Name | Type | Description | Required
--- | -- | -- | --
-`cart_id` | String | ID of the current cart. | Yes
+| Name      | Type   | Description             | Required |
+| --------- | ------ | ----------------------- | -------- |
+| `cart_id` | String | ID of the current cart. | Yes      |
 
 The response should also store the `cart_id` in a cookie on its own domain in the response.
 
@@ -86,9 +90,20 @@ keys are not sequential for a reason.
 ## Guidelines
 
 - Follow best Python standards and practices (i.e. PEP8)
+
 - Implement unit tests for your code. Integration tests may also be useful for
 writing your application.
+
 - Include any documentation on how to run your app and be sure to update the
 `requirements.txt` file if necessary.
+
 - Feel free to utilize any other libraries (e.g. Django Rest Framework) or services
 (e.g. redis) that you feel may be of use in completing the task.
+
+## Running the application
+
+- `pip install` dependencies specified in requirements.txt
+
+- `./manage.py runserver` to start the app server
+
+- `celery -A rj_exercise worker --loglevel=info` to start the task queue
