@@ -14,3 +14,6 @@ class Item(models.Model):
     product_id = models.TextField()
     name = models.TextField(null=True)
     price = models.IntegerField(null=True)
+
+    class Meta:
+        unique_together = (('cart', 'product_id'),)
