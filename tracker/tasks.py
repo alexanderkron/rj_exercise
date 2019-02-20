@@ -9,12 +9,18 @@ from .models import Cart, Item
 def add_item_to_cart(cart_id, product_id, name=None, price=None):
     cart, _created = Cart.objects.get_or_create(pk=cart_id)
 
-    if Item.objects.filter(cart_id=cart.id, product_id=product_id).exists():
+    try:
+        item = Item.objects.get(cart_id=cart.id, product_id=product_id)
+    except Item.DoesNotExist:
+        Item.objects.create(
+            cart_id=cart.id,
+            product_id=product_id,
+            name=name,
+            price=price
+        )
         return
 
-    Item.objects.create(
-        cart_id=cart.id,
-        product_id=product_id,
-        name=name,
-        price=price
-    )
+    if item.name != name or item.price != price:
+        Item.objects.filter(
+            cart_id=cart.id, product_id=product_id
+        ).update(name=name, price=price)

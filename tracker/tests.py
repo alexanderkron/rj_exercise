@@ -2,6 +2,7 @@ import uuid
 from mock import patch
 from django.http.cookie import SimpleCookie
 from django.test import TestCase
+from django.test.utils import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -110,6 +111,7 @@ class ItemsTest(APITestCase):
 
 
 class TasksTest(TestCase):
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_add_item_to_cart_creates_cart_if_necessary(self):
         add_item_to_cart.delay(
             GENERATED_CART_ID, PRODUCT_ID, NAME, PRICE
@@ -117,6 +119,7 @@ class TasksTest(TestCase):
         cart = Cart.objects.get(pk=GENERATED_CART_ID)
         self.assertIsNotNone(cart)
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_add_item_to_cart_finds_existing_cart(self):
         cart = Cart.objects.create(pk=GENERATED_CART_ID)
         add_item_to_cart.delay(
@@ -128,6 +131,7 @@ class TasksTest(TestCase):
         carts = Cart.objects.all()
         self.assertEqual(carts.count(), 1)
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_add_item_to_cart_persists_item(self):
         cart = Cart.objects.create()
         add_item_to_cart.delay(
@@ -137,7 +141,8 @@ class TasksTest(TestCase):
         self.assertIsNotNone(item)
         self.assertEqual(item.product_id, PRODUCT_ID)
 
-    def test_add_item_to_cart_does_not_duplicate(self):
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    def test_add_item_to_cart_updates_attributes_for_existing_keys(self):
         cart = Cart.objects.create()
         Item.objects.create(
             cart_id=cart.id,
@@ -147,9 +152,14 @@ class TasksTest(TestCase):
         )
         self.assertEqual(cart.items.all().count(), 1)
 
+        updated_name = 'shirt'
+        updated_price = 20
         add_item_to_cart.delay(
-            cart.id, PRODUCT_ID, NAME, PRICE
+            cart.id, PRODUCT_ID, updated_name, updated_price
         ).get()
 
         items = Item.objects.all()
         self.assertEqual(items.count(), 1)
+
+        self.assertEqual(items[0].name, updated_name)
+        self.assertEqual(items[0].price, updated_price)
